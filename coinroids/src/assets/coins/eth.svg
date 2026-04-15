@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <defs>
+    <linearGradient id="ethBg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f2f4fa"/>
+      <stop offset="100%" stop-color="#d7dbe8"/>
+    </linearGradient>
+  </defs>
+  <circle cx="48" cy="48" r="44" fill="url(#ethBg)" stroke="#ffffff" stroke-width="4"/>
+  <polygon points="48,12 29,46 48,36 67,46" fill="#3b4458"/>
+  <polygon points="48,84 29,50 48,60 67,50" fill="#687391"/>
+  <polygon points="48,39 29,48 48,56 67,48" fill="#555f7b" opacity="0.9"/>
+</svg>

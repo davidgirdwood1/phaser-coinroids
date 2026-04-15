@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coinroids</title>
+    <meta
+      name="description"
+      content="A fast browser arcade game where you blast meme and blue-chip crypto coins into your wallet."
+    />
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div>
+          <h1>Coinroids</h1>
+          <p>Blast coins. Fill your wallet. Survive 60 seconds.</p>
+        </div>
+        <div class="instructions">
+          <span>W / ↑ thrust</span>
+          <span>A D / ← → rotate</span>
+          <span>Space shoot</span>
+          <span>Shift brake</span>
+        </div>
+      </header>
+
+      <main class="game-shell">
+        <aside class="hud-card">
+          <h2>Wallet</h2>
+          <ul id="wallet-list"></ul>
+          <div class="wallet-total">
+            <span>Total</span>
+            <strong id="wallet-total">$0.00</strong>
+          </div>
+          <button id="restart-button" class="secondary-button">New Run</button>
+        </aside>
+
+        <section class="game-card">
+          <div id="game-container"></div>
+        </section>
+      </main>
+    </div>
+
+    <div id="overlay" class="overlay hidden" aria-hidden="true">
+      <div class="modal">
+        <p class="eyebrow">Run complete</p>
+        <h2 id="modal-title">Nice run 🚀</h2>
+        <p id="modal-summary"></p>
+        <div id="modal-breakdown" class="modal-breakdown"></div>
+        <button id="play-again-button" class="primary-button">Play again</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

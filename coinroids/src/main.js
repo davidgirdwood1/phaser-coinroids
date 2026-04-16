@@ -16,12 +16,14 @@ const DRAG = 0.992;
 const BRAKE_DRAG = 0.965;
 
 // ===== AUDIO VOLUME CONFIG =====
-const MASTER_VOLUME = 0.8;     // overall volume (0.0 – 1.0)
-
+const MASTER_VOLUME = 0.8;
 const SHOOT_VOLUME = 0.35;
 const COIN_VOLUME = 0.45;
 const COIN_FINAL_VOLUME = 0.6;
 const HIT_VOLUME = 0.7;
+
+// ===== LOCAL TOP SCORE =====
+const TOP_RUN_STORAGE_KEY = 'coinroidsTopRun';
 
 const usdFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -56,6 +58,7 @@ for (const symbol of Object.keys(COIN_TYPES)) {
 
 const walletListEl = document.getElementById('wallet-list');
 const walletTotalEl = document.getElementById('wallet-total');
+const topRunEl = document.getElementById('top-run');
 const overlayEl = document.getElementById('overlay');
 const modalTitleEl = document.getElementById('modal-title');
 const modalSummaryEl = document.getElementById('modal-summary');
@@ -69,6 +72,35 @@ function formatCoinAmount(symbol, amount) {
 
 function formatUsd(value) {
   return usdFormatter.format(value);
+}
+
+function getTopRun() {
+  try {
+    const raw = localStorage.getItem(TOP_RUN_STORAGE_KEY);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw);
+    return typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function setTopRun(value) {
+  localStorage.setItem(TOP_RUN_STORAGE_KEY, JSON.stringify(value));
+}
+
+function maybeUpdateTopRun(value) {
+  const currentTopRun = getTopRun();
+  if (value > currentTopRun) {
+    setTopRun(value);
+    return value;
+  }
+  return currentTopRun;
+}
+
+function renderTopRun() {
+  if (!topRunEl) return;
+  topRunEl.textContent = formatUsd(getTopRun());
 }
 
 function getWalletTotalUsd() {
@@ -584,10 +616,12 @@ class CoinroidsScene extends Phaser.Scene {
     });
 
     const totalUsd = getWalletTotalUsd();
+    const topRun = maybeUpdateTopRun(totalUsd);
+    renderTopRun();
     const survivedSeconds = ((ROUND_DURATION_MS - Math.max(0, this.endTime - this.time.now)) / 1000).toFixed(1);
 
     modalTitleEl.textContent = reason === 'Time is up!' ? 'Wallet secured 🎉' : 'Run over 💥';
-    modalSummaryEl.textContent = `${reason} You survived ${survivedSeconds} seconds and captured ${this.coinsCollected} coins worth ${formatUsd(totalUsd)}.`;
+    modalSummaryEl.textContent = `${reason} You survived ${survivedSeconds} seconds and captured ${this.coinsCollected} coins worth ${formatUsd(totalUsd)}. Top run: ${formatUsd(topRun)}.`;
     modalBreakdownEl.innerHTML = Object.entries(COIN_TYPES)
       .map(([symbol, config]) => {
         return `
@@ -645,3 +679,4 @@ restartButtonEl.addEventListener('click', restartGame);
 playAgainButtonEl.addEventListener('click', restartGame);
 
 renderWallet();
+renderTopRun();

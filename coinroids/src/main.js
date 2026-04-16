@@ -19,7 +19,7 @@ const SHOOT_VOLUME = 0.35;
 const COIN_VOLUME = 0.45;
 const COIN_FINAL_VOLUME = 0.6;
 const HIT_VOLUME = 0.7;
-const SHIELD_COLOR = 0x7df9ff; // neon cyan
+const SHIELD_COLOR = 0x7c8cff;
 
 const TOP_RUN_STORAGE_KEY = 'coinroidsTopRun';
 
@@ -80,7 +80,7 @@ const COIN_TYPES = {
     amount: 4,
     usd: 0.72,
     scale: 0.96,
-    shieldMax: 0,
+    shieldMax: 1,
     speed: 75,
     spawnWeight: 14,
     assetUrl: dogeUrl,
@@ -615,13 +615,11 @@ class CoinroidsScene extends Phaser.Scene {
     coin.setScale(config.scale);
     coin.setCircle(28);
     coin.setBounce(1, 1);
+
     coin.setDepth(2);
-
-    coin.shieldAura = this.add.circle(x, y, 38, config.ring, 0.08).setDepth(1.3);
-    coin.shieldAura.setStrokeStyle(2, config.ring, 0.28);
-
-    coin.shieldRing = this.add.graphics().setDepth(1.7);
-    coin.coreRing = this.add.circle(x, y, 34, 0xffffff, 0).setDepth(1.6);
+    coin.shieldAura = this.add.circle(x, y, 38, config.ring, 0.04).setDepth(1.7);
+    coin.shieldRing = this.add.graphics().setDepth(1.85);
+    coin.coreRing = this.add.circle(x, y, 34, 0xffffff, 0).setDepth(1.8);
     coin.coreRing.setStrokeStyle(2, 0xffffff, 0.1);
 
     this.updateCoinShieldVisual(coin, true);
@@ -635,41 +633,58 @@ class CoinroidsScene extends Phaser.Scene {
 
     const x = coin.x;
     const y = coin.y;
-    const outerRadius = 37;
+    const outerRadius = Math.max(coin.displayWidth, coin.displayHeight) * 0.5;
+    const glowRadius = outerRadius + 3;
     const shieldPercent = coin.shieldMax > 0 ? Phaser.Math.Clamp(coin.shield / coin.shieldMax, 0, 1) : 0;
     const pulseAlpha = 0.18 + coin.damagePulse * 0.28;
 
     if (coin.shieldAura) {
       coin.shieldAura.x = x;
       coin.shieldAura.y = y;
-      coin.shieldAura.setFillStyle(coin.config.ring, shieldPercent > 0 ? 0.08 + pulseAlpha * 0.25 : 0.03);
-      coin.shieldAura.setStrokeStyle(2, coin.config.ring, shieldPercent > 0 ? 0.25 + pulseAlpha * 0.3 : 0.08);
+      coin.shieldAura.setRadius(outerRadius + 2);
+      coin.shieldAura.setFillStyle(coin.config.ring, shieldPercent > 0 ? 0.025 + pulseAlpha * 0.06 : 0.01);
+      coin.shieldAura.setStrokeStyle(1, coin.config.ring, shieldPercent > 0 ? 0.08 + pulseAlpha * 0.08 : 0.03);
       coin.shieldAura.setScale(1 + coin.damagePulse * 0.05);
     }
 
     if (coin.coreRing) {
       coin.coreRing.x = x;
       coin.coreRing.y = y;
-      coin.coreRing.setStrokeStyle(2, shieldPercent > 0 ? 0xffffff : coin.config.shieldColor, shieldPercent > 0 ? 0.1 : 0.28);
+      coin.coreRing.setRadius(outerRadius - 6);
+      coin.coreRing.setStrokeStyle(2, shieldPercent > 0 ? 0xffffff : coin.config.shieldColor, shieldPercent > 0 ? 0.08 : 0.22);
     }
 
     if (!coin.shieldRing) return;
 
     coin.shieldRing.clear();
 
+    coin.shieldRing.lineStyle(2, coin.config.shieldColor, 0.08);
+    coin.shieldRing.strokeCircle(x, y, outerRadius);
+
     if (shieldPercent > 0) {
-      coin.shieldRing.lineStyle(6, coin.config.shieldColor, 0.95);
+      coin.shieldRing.lineStyle(8, coin.config.shieldColor, 0.38);
       coin.shieldRing.beginPath();
-      coin.shieldRing.arc(x, y, outerRadius, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * shieldPercent), false);
+      coin.shieldRing.arc(
+        x,
+        y,
+        outerRadius,
+        -Math.PI / 2,
+        (-Math.PI / 2) + (Math.PI * 2 * shieldPercent),
+        false
+      );
       coin.shieldRing.strokePath();
 
-      coin.shieldRing.lineStyle(2, 0xffffff, 0.22 + pulseAlpha * 0.25);
+      coin.shieldRing.lineStyle(2, 0xffffff, 0.16);
       coin.shieldRing.beginPath();
-      coin.shieldRing.arc(x, y, outerRadius + 5, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * shieldPercent), false);
+      coin.shieldRing.arc(
+        x,
+        y,
+        glowRadius,
+        -Math.PI / 2,
+        (-Math.PI / 2) + (Math.PI * 2 * shieldPercent),
+        false
+      );
       coin.shieldRing.strokePath();
-    } else {
-      coin.shieldRing.lineStyle(2, coin.config.shieldColor, 0.12 + coin.damagePulse * 0.2);
-      coin.shieldRing.strokeCircle(x, y, outerRadius);
     }
   }
 

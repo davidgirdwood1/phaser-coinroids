@@ -290,3 +290,9 @@ button {
 .breakdown-row strong {
   color: #f6fbff;
 }
+
+.wallet-note {
+  margin: -4px 0 14px;
+  color: #9fb0d7;
+  font-size: 0.82rem;
+}

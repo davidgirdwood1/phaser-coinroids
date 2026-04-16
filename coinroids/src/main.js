@@ -21,7 +21,17 @@ const COIN_FINAL_VOLUME = 0.6;
 const HIT_VOLUME = 0.7;
 const SHIELD_COLOR = 0x7c8cff;
 
-const TOP_RUN_STORAGE_KEY = 'coinroidsTopRun';
+// Price snapshot frozen on 2026-04-16 for arcade balance.
+const PRICE_SNAPSHOT_LABEL = 'Price snapshot · Apr 16, 2026';
+const TOP_RUN_STORAGE_KEY = 'coinroidsTopRun_priceSnapshot_v1';
+
+const COIN_SCALES = {
+  XXL: 1.28,
+  XL: 1.14,
+  L: 1.0,
+  M: 0.88,
+  S: 0.78
+};
 
 const usdFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -30,72 +40,82 @@ const usdFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2
 });
 
+const integerFormatter = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0
+});
+
 const amountFormatters = {
-  BTC: new Intl.NumberFormat('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }),
-  ETH: new Intl.NumberFormat('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }),
-  SOL: new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-  DOGE: new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }),
-  XRP: new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+  BTC: integerFormatter,
+  ETH: integerFormatter,
+  SOL: integerFormatter,
+  DOGE: integerFormatter,
+  XRP: integerFormatter
 };
 
 const COIN_TYPES = {
   BTC: {
     label: 'Bitcoin',
-    amount: 0.0001,
-    usd: 8.5,
-    scale: 1.18,
-    shieldMax: 2,
-    speed: 42,
-    spawnWeight: 8,
+    amount: 1,
+    usd: 74928.79,
+    sizeClass: 'XXL',
+    scale: COIN_SCALES.XXL,
+    shieldMax: 10,
+    speed: 34,
+    spawnWeight: 2,
     assetUrl: btcUrl,
     ring: SHIELD_COLOR,
     shieldColor: SHIELD_COLOR
   },
   ETH: {
     label: 'Ethereum',
-    amount: 0.0015,
-    usd: 4.8,
-    scale: 1.08,
-    shieldMax: 1,
-    speed: 58,
-    spawnWeight: 10,
+    amount: 1,
+    usd: 2350.53,
+    sizeClass: 'XL',
+    scale: COIN_SCALES.XL,
+    shieldMax: 6,
+    speed: 46,
+    spawnWeight: 5,
     assetUrl: ethUrl,
     ring: SHIELD_COLOR,
     shieldColor: SHIELD_COLOR
   },
   SOL: {
     label: 'Solana',
-    amount: 0.08,
-    usd: 10.75,
-    scale: 1.02,
-    shieldMax: 1,
-    speed: 68,
-    spawnWeight: 10,
+    amount: 1,
+    usd: 90.08,
+    sizeClass: 'L',
+    scale: COIN_SCALES.L,
+    shieldMax: 3,
+    speed: 62,
+    spawnWeight: 9,
     assetUrl: solUrl,
-    ring: SHIELD_COLOR,
-    shieldColor: SHIELD_COLOR
-  },
-  DOGE: {
-    label: 'Dogecoin',
-    amount: 4,
-    usd: 0.72,
-    scale: 0.96,
-    shieldMax: 1,
-    speed: 75,
-    spawnWeight: 14,
-    assetUrl: dogeUrl,
     ring: SHIELD_COLOR,
     shieldColor: SHIELD_COLOR
   },
   XRP: {
     label: 'XRP',
-    amount: 8,
-    usd: 1.04,
-    scale: 0.92,
-    shieldMax: 1,
-    speed: 94,
-    spawnWeight: 12,
+    amount: 1,
+    usd: 1.45,
+    sizeClass: 'M',
+    scale: COIN_SCALES.M,
+    shieldMax: 2,
+    speed: 86,
+    spawnWeight: 13,
     assetUrl: xrpUrl,
+    ring: SHIELD_COLOR,
+    shieldColor: SHIELD_COLOR
+  },
+  DOGE: {
+    label: 'Dogecoin',
+    amount: 1,
+    usd: 0.09901,
+    sizeClass: 'S',
+    scale: COIN_SCALES.S,
+    shieldMax: 1,
+    speed: 108,
+    spawnWeight: 17,
+    assetUrl: dogeUrl,
     ring: SHIELD_COLOR,
     shieldColor: SHIELD_COLOR
   }
@@ -116,9 +136,10 @@ const modalSummaryEl = document.getElementById('modal-summary');
 const modalBreakdownEl = document.getElementById('modal-breakdown');
 const restartButtonEl = document.getElementById('restart-button');
 const playAgainButtonEl = document.getElementById('play-again-button');
+const walletSnapshotEl = document.getElementById('wallet-snapshot');
 
 function formatCoinAmount(symbol, amount) {
-  return (amountFormatters[symbol] ?? amountFormatters.DOGE).format(amount);
+  return (amountFormatters[symbol] ?? integerFormatter).format(amount);
 }
 
 function formatUsd(value) {
@@ -154,6 +175,11 @@ function renderTopRun() {
   topRunEl.textContent = formatUsd(getTopRun());
 }
 
+function renderPriceSnapshotLabel() {
+  if (!walletSnapshotEl) return;
+  walletSnapshotEl.textContent = `${PRICE_SNAPSHOT_LABEL} · 1 pickup = 1 full coin`;
+}
+
 function getWalletTotalUsd(walletState = wallet) {
   return Object.entries(walletState).reduce((sum, [symbol, count]) => {
     return sum + count * COIN_TYPES[symbol].usd;
@@ -172,7 +198,7 @@ function buildWalletDom() {
         <img class="wallet-icon" src="${config.assetUrl}" alt="${config.label} logo" />
         <div>
           <strong>${symbol}</strong>
-          <small>${config.label}</small>
+          <small>${config.label} · ${config.sizeClass}</small>
         </div>
       </div>
       <div class="wallet-item__right">
@@ -346,7 +372,6 @@ class CoinroidsScene extends Phaser.Scene {
     this.coinsCollected = 0;
     this.shipLives = 3;
     this.soundSynth = null;
-    this.muzzleCooldownUntil = 0;
   }
 
   preload() {
@@ -489,7 +514,9 @@ class CoinroidsScene extends Phaser.Scene {
     const dt = delta / 1000;
     const turnSpeed = 210;
     const thrustPower = 210;
-    const rotationInput = (this.keys.left.isDown || this.keys.a.isDown ? -1 : 0) + (this.keys.right.isDown || this.keys.d.isDown ? 1 : 0);
+    const rotationInput =
+      (this.keys.left.isDown || this.keys.a.isDown ? -1 : 0) +
+      (this.keys.right.isDown || this.keys.d.isDown ? 1 : 0);
 
     this.ship.setAngularVelocity(rotationInput * turnSpeed);
 
@@ -508,7 +535,10 @@ class CoinroidsScene extends Phaser.Scene {
 
     this.ship.body.velocity.limit(MAX_SPEED);
 
-    if (Phaser.Input.Keyboard.JustDown(this.keys.space) || (this.keys.space.isDown && time - this.lastShotAt > SHOOT_DELAY_MS)) {
+    if (
+      Phaser.Input.Keyboard.JustDown(this.keys.space) ||
+      (this.keys.space.isDown && time - this.lastShotAt > SHOOT_DELAY_MS)
+    ) {
       this.fireBullet(time);
     }
 
@@ -517,7 +547,6 @@ class CoinroidsScene extends Phaser.Scene {
     this.bullets.children.iterate((bullet) => {
       if (!bullet?.active) return;
 
-      // kill if offscreen
       if (
         bullet.x < -50 || bullet.x > GAME_WIDTH + 50 ||
         bullet.y < -50 || bullet.y > GAME_HEIGHT + 50
@@ -532,6 +561,7 @@ class CoinroidsScene extends Phaser.Scene {
         bullet.body.velocity.x * 1.001,
         bullet.body.velocity.y * 1.001
       );
+
       if (bullet.lifeMs <= 0) {
         bullet.destroy();
       }
@@ -576,7 +606,6 @@ class CoinroidsScene extends Phaser.Scene {
       bullet.body.velocity.x += inheritedVelocityX;
       bullet.body.velocity.y += inheritedVelocityY;
       bullet.lifeMs = 800;
-      bullet.isLaser = true;
       bullet.setData('pairedBullet', bullet === glow ? core : glow);
     }
 
@@ -624,8 +653,14 @@ class CoinroidsScene extends Phaser.Scene {
 
     this.updateCoinShieldVisual(coin, true);
 
-    const targetAngle = Phaser.Math.Angle.Between(x, y, this.ship.x, this.ship.y) + Phaser.Math.FloatBetween(-0.5, 0.5);
-    this.physics.velocityFromRotation(targetAngle, config.speed + Phaser.Math.Between(-10, 20), coin.body.velocity);
+    const targetAngle =
+      Phaser.Math.Angle.Between(x, y, this.ship.x, this.ship.y) +
+      Phaser.Math.FloatBetween(-0.5, 0.5);
+    this.physics.velocityFromRotation(
+      targetAngle,
+      config.speed + Phaser.Math.Between(-10, 20),
+      coin.body.velocity
+    );
   }
 
   updateCoinShieldVisual(coin, force = false) {
@@ -635,15 +670,23 @@ class CoinroidsScene extends Phaser.Scene {
     const y = coin.y;
     const outerRadius = Math.max(coin.displayWidth, coin.displayHeight) * 0.5;
     const glowRadius = outerRadius + 3;
-    const shieldPercent = coin.shieldMax > 0 ? Phaser.Math.Clamp(coin.shield / coin.shieldMax, 0, 1) : 0;
+    const shieldPercent =
+      coin.shieldMax > 0 ? Phaser.Math.Clamp(coin.shield / coin.shieldMax, 0, 1) : 0;
     const pulseAlpha = 0.18 + coin.damagePulse * 0.28;
 
     if (coin.shieldAura) {
       coin.shieldAura.x = x;
       coin.shieldAura.y = y;
       coin.shieldAura.setRadius(outerRadius + 2);
-      coin.shieldAura.setFillStyle(coin.config.ring, shieldPercent > 0 ? 0.025 + pulseAlpha * 0.06 : 0.01);
-      coin.shieldAura.setStrokeStyle(1, coin.config.ring, shieldPercent > 0 ? 0.08 + pulseAlpha * 0.08 : 0.03);
+      coin.shieldAura.setFillStyle(
+        coin.config.ring,
+        shieldPercent > 0 ? 0.025 + pulseAlpha * 0.06 : 0.01
+      );
+      coin.shieldAura.setStrokeStyle(
+        1,
+        coin.config.ring,
+        shieldPercent > 0 ? 0.08 + pulseAlpha * 0.08 : 0.03
+      );
       coin.shieldAura.setScale(1 + coin.damagePulse * 0.05);
     }
 
@@ -651,13 +694,16 @@ class CoinroidsScene extends Phaser.Scene {
       coin.coreRing.x = x;
       coin.coreRing.y = y;
       coin.coreRing.setRadius(outerRadius - 6);
-      coin.coreRing.setStrokeStyle(2, shieldPercent > 0 ? 0xffffff : coin.config.shieldColor, shieldPercent > 0 ? 0.08 : 0.22);
+      coin.coreRing.setStrokeStyle(
+        2,
+        shieldPercent > 0 ? 0xffffff : coin.config.shieldColor,
+        shieldPercent > 0 ? 0.08 : 0.22
+      );
     }
 
     if (!coin.shieldRing) return;
 
     coin.shieldRing.clear();
-
     coin.shieldRing.lineStyle(2, coin.config.shieldColor, 0.08);
     coin.shieldRing.strokeCircle(x, y, outerRadius);
 
@@ -766,6 +812,7 @@ class CoinroidsScene extends Phaser.Scene {
     const x = this.ship.x + Math.cos(this.ship.rotation) * 20;
     const y = this.ship.y + Math.sin(this.ship.rotation) * 20;
     const flash = this.add.circle(x, y, 10, 0x9ffcff, 0.85).setDepth(3.4);
+
     this.tweens.add({
       targets: flash,
       alpha: 0,
@@ -798,6 +845,7 @@ class CoinroidsScene extends Phaser.Scene {
       const particle = this.add.circle(x, y, Phaser.Math.Between(2, 5), color, 0.9).setDepth(3);
       const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
       const distance = Phaser.Math.Between(16, 56);
+
       this.tweens.add({
         targets: particle,
         x: x + Math.cos(angle) * distance,
@@ -821,6 +869,7 @@ class CoinroidsScene extends Phaser.Scene {
       gameObject.shieldAura.x = gameObject.x;
       gameObject.shieldAura.y = gameObject.y;
     }
+
     if (gameObject.shieldRing || gameObject.coreRing) {
       this.updateCoinShieldVisual(gameObject, true);
     }
@@ -853,16 +902,22 @@ class CoinroidsScene extends Phaser.Scene {
     const totalUsd = getWalletTotalUsd(walletSnapshot);
     const topRun = maybeUpdateTopRun(totalUsd);
     renderTopRun();
-    const survivedSeconds = ((ROUND_DURATION_MS - Math.max(0, this.endTime - this.time.now)) / 1000).toFixed(1);
+    const survivedSeconds = (
+      (ROUND_DURATION_MS - Math.max(0, this.endTime - this.time.now)) / 1000
+    ).toFixed(1);
 
     modalTitleEl.textContent = reason === 'Time is up!' ? 'Wallet secured 🎉' : 'Run over 💥';
-    modalSummaryEl.textContent = `${reason} You survived ${survivedSeconds} seconds and captured ${this.coinsCollected} coins worth ${formatUsd(totalUsd)}. Top run: ${formatUsd(topRun)}.`;
+    modalSummaryEl.textContent =
+      `${reason} You survived ${survivedSeconds} seconds and captured ${this.coinsCollected} coins ` +
+      `worth ${formatUsd(totalUsd)}. Top run: ${formatUsd(topRun)}.`;
+
     modalBreakdownEl.innerHTML = Object.entries(COIN_TYPES)
       .map(([symbol, config]) => {
+        const count = walletSnapshot[symbol];
         return `
           <div class="breakdown-row">
             <span>${symbol} · ${config.label}</span>
-            <strong>${formatCoinAmount(symbol, walletSnapshot[symbol])}</strong>
+            <strong>${formatCoinAmount(symbol, count)} · ${formatUsd(count * config.usd)}</strong>
           </div>
         `;
       })
@@ -913,5 +968,6 @@ function restartGame() {
 restartButtonEl.addEventListener('click', restartGame);
 playAgainButtonEl.addEventListener('click', restartGame);
 
+renderPriceSnapshotLabel();
 renderWallet();
 renderTopRun();

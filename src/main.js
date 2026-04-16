@@ -460,11 +460,11 @@ class CoinroidsScene extends Phaser.Scene {
     this.input.keyboard.once('keydown', () => this.soundSynth.ensureReady());
 
     this.createHud();
-    this.time.delayedCall(800, () => this.spawnCoinWave(5));
+    this.time.delayedCall(800, () => this.spawnCoinWave(3));
     this.coinSpawnEvent = this.time.addEvent({
-      delay: 1200,
+      delay: 1800, // was 1200
       loop: true,
-      callback: () => this.spawnCoinWave(Phaser.Math.Between(2, 4))
+      callback: () => this.spawnCoinWave(Phaser.Math.Between(1, 3)) // was 2–4
     });
 
     this.endTime = this.time.now + ROUND_DURATION_MS;

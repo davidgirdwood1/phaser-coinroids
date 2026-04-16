@@ -4,8 +4,7 @@ import btcUrl from './assets/coins/btc.svg';
 import ethUrl from './assets/coins/eth.svg';
 import solUrl from './assets/coins/sol.svg';
 import dogeUrl from './assets/coins/doge.svg';
-import pepeUrl from './assets/coins/pepe.svg';
-import bonkUrl from './assets/coins/bonk.svg';
+import xrpUrl from './assets/coins/xrp.svg';
 
 const GAME_WIDTH = 1100;
 const GAME_HEIGHT = 700;
@@ -15,14 +14,13 @@ const MAX_SPEED = 360;
 const DRAG = 0.992;
 const BRAKE_DRAG = 0.965;
 
-// ===== AUDIO VOLUME CONFIG =====
 const MASTER_VOLUME = 0.8;
 const SHOOT_VOLUME = 0.35;
 const COIN_VOLUME = 0.45;
 const COIN_FINAL_VOLUME = 0.6;
 const HIT_VOLUME = 0.7;
+const SHIELD_COLOR = 0x7df9ff; // neon cyan
 
-// ===== LOCAL TOP SCORE =====
 const TOP_RUN_STORAGE_KEY = 'coinroidsTopRun';
 
 const usdFormatter = new Intl.NumberFormat('en-US', {
@@ -37,17 +35,70 @@ const amountFormatters = {
   ETH: new Intl.NumberFormat('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }),
   SOL: new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
   DOGE: new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }),
-  PEPE: new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }),
-  BONK: new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+  XRP: new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 };
 
 const COIN_TYPES = {
-  BTC: { label: 'Bitcoin', amount: 0.0001, usd: 8.5, scale: 1.2, hp: 3, speed: 42, spawnWeight: 8, assetUrl: btcUrl, ring: 0xf7931a },
-  ETH: { label: 'Ethereum', amount: 0.0015, usd: 4.8, scale: 1.08, hp: 2, speed: 58, spawnWeight: 10, assetUrl: ethUrl, ring: 0x8e9cff },
-  SOL: { label: 'Solana', amount: 0.08, usd: 10.75, scale: 1.02, hp: 2, speed: 68, spawnWeight: 10, assetUrl: solUrl, ring: 0x3df2cb },
-  DOGE: { label: 'Dogecoin', amount: 4, usd: 0.72, scale: 0.96, hp: 1, speed: 75, spawnWeight: 14, assetUrl: dogeUrl, ring: 0xdcb350 },
-  PEPE: { label: 'Pepe', amount: 800, usd: 0.65, scale: 0.88, hp: 1, speed: 92, spawnWeight: 14, assetUrl: pepeUrl, ring: 0x56d36d },
-  BONK: { label: 'Bonk', amount: 3000, usd: 0.54, scale: 0.82, hp: 1, speed: 112, spawnWeight: 12, assetUrl: bonkUrl, ring: 0xff7f50 }
+  BTC: {
+    label: 'Bitcoin',
+    amount: 0.0001,
+    usd: 8.5,
+    scale: 1.18,
+    shieldMax: 2,
+    speed: 42,
+    spawnWeight: 8,
+    assetUrl: btcUrl,
+    ring: SHIELD_COLOR,
+    shieldColor: SHIELD_COLOR
+  },
+  ETH: {
+    label: 'Ethereum',
+    amount: 0.0015,
+    usd: 4.8,
+    scale: 1.08,
+    shieldMax: 1,
+    speed: 58,
+    spawnWeight: 10,
+    assetUrl: ethUrl,
+    ring: SHIELD_COLOR,
+    shieldColor: SHIELD_COLOR
+  },
+  SOL: {
+    label: 'Solana',
+    amount: 0.08,
+    usd: 10.75,
+    scale: 1.02,
+    shieldMax: 1,
+    speed: 68,
+    spawnWeight: 10,
+    assetUrl: solUrl,
+    ring: SHIELD_COLOR,
+    shieldColor: SHIELD_COLOR
+  },
+  DOGE: {
+    label: 'Dogecoin',
+    amount: 4,
+    usd: 0.72,
+    scale: 0.96,
+    shieldMax: 0,
+    speed: 75,
+    spawnWeight: 14,
+    assetUrl: dogeUrl,
+    ring: SHIELD_COLOR,
+    shieldColor: SHIELD_COLOR
+  },
+  XRP: {
+    label: 'XRP',
+    amount: 8,
+    usd: 1.04,
+    scale: 0.92,
+    shieldMax: 1,
+    speed: 94,
+    spawnWeight: 12,
+    assetUrl: xrpUrl,
+    ring: SHIELD_COLOR,
+    shieldColor: SHIELD_COLOR
+  }
 };
 
 const wallet = {};
@@ -103,8 +154,8 @@ function renderTopRun() {
   topRunEl.textContent = formatUsd(getTopRun());
 }
 
-function getWalletTotalUsd() {
-  return Object.entries(wallet).reduce((sum, [symbol, count]) => {
+function getWalletTotalUsd(walletState = wallet) {
+  return Object.entries(walletState).reduce((sum, [symbol, count]) => {
     return sum + count * COIN_TYPES[symbol].usd;
   }, 0);
 }
@@ -144,7 +195,7 @@ function flashWalletCard(symbol) {
   el.classList.add('wallet-flash');
 }
 
-function renderWallet() {
+function renderWallet(walletState = wallet) {
   if (!walletListEl.children.length) {
     buildWalletDom();
   }
@@ -152,11 +203,11 @@ function renderWallet() {
   for (const [symbol, config] of Object.entries(COIN_TYPES)) {
     const row = walletDomBySymbol[symbol];
     if (!row) continue;
-    row.querySelector('[data-role="amount"]').textContent = formatCoinAmount(symbol, wallet[symbol]);
-    row.querySelector('[data-role="usd"]').textContent = formatUsd(wallet[symbol] * config.usd);
+    row.querySelector('[data-role="amount"]').textContent = formatCoinAmount(symbol, walletState[symbol]);
+    row.querySelector('[data-role="usd"]').textContent = formatUsd(walletState[symbol] * config.usd);
   }
 
-  walletTotalEl.textContent = formatUsd(getWalletTotalUsd());
+  walletTotalEl.textContent = formatUsd(getWalletTotalUsd(walletState));
 }
 
 function resetWallet() {
@@ -213,16 +264,16 @@ class SoundSynth {
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(880, now);
-    osc.frequency.exponentialRampToValueAtTime(320, now + 0.07);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(1320, now);
+    osc.frequency.exponentialRampToValueAtTime(760, now + 0.05);
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(SHOOT_VOLUME, now + 0.005);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
+    gain.gain.exponentialRampToValueAtTime(SHOOT_VOLUME, now + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.065);
     osc.connect(gain);
     this.connectNode(gain);
     osc.start(now);
-    osc.stop(now + 0.08);
+    osc.stop(now + 0.07);
   }
 
   playCoinHit(isFinal = false) {
@@ -243,6 +294,23 @@ class SoundSynth {
     this.connectNode(gain);
     osc.start(now);
     osc.stop(now + 0.13);
+  }
+
+  playShieldHit() {
+    if (!this.ensureReady()) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(520, now);
+    osc.frequency.exponentialRampToValueAtTime(320, now + 0.08);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.22, now + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+    osc.connect(gain);
+    this.connectNode(gain);
+    osc.start(now);
+    osc.stop(now + 0.1);
   }
 
   playPlayerHit() {
@@ -278,6 +346,7 @@ class CoinroidsScene extends Phaser.Scene {
     this.coinsCollected = 0;
     this.shipLives = 3;
     this.soundSynth = null;
+    this.muzzleCooldownUntil = 0;
   }
 
   preload() {
@@ -292,6 +361,7 @@ class CoinroidsScene extends Phaser.Scene {
     this.lastShotAt = 0;
     this.coinsCollected = 0;
     this.shipLives = 3;
+    this.physics.world.resume();
     this.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
     this.soundSynth = new SoundSynth(this);
 
@@ -309,7 +379,7 @@ class CoinroidsScene extends Phaser.Scene {
 
     this.bullets = this.physics.add.group({
       classType: Phaser.Physics.Arcade.Image,
-      maxSize: 40,
+      maxSize: 50,
       runChildUpdate: false
     });
 
@@ -362,21 +432,29 @@ class CoinroidsScene extends Phaser.Scene {
       ship.destroy();
     }
 
-    if (!this.textures.exists('bullet')) {
-      const bullet = this.make.graphics({ x: 0, y: 0, add: false });
-      bullet.fillStyle(0xffffff, 1);
-      bullet.fillCircle(4, 4, 4);
-      bullet.generateTexture('bullet', 8, 8);
-      bullet.destroy();
+    if (!this.textures.exists('bullet-core')) {
+      const core = this.make.graphics({ x: 0, y: 0, add: false });
+      core.fillStyle(0xc8fdff, 1);
+      core.fillRoundedRect(10, 3, 28, 6, 3);
+      core.generateTexture('bullet-core', 48, 12);
+      core.destroy();
+    }
+
+    if (!this.textures.exists('bullet-glow')) {
+      const glow = this.make.graphics({ x: 0, y: 0, add: false });
+      glow.fillStyle(0x74f0ff, 0.25);
+      glow.fillRoundedRect(4, 1, 40, 10, 5);
+      glow.generateTexture('bullet-glow', 48, 12);
+      glow.destroy();
     }
   }
 
   createStarfield() {
     const stars = this.add.graphics();
     for (let i = 0; i < 150; i += 1) {
-      const alpha = Phaser.Math.FloatBetween(0.25, 0.9);
+      const alpha = Phaser.Math.FloatBetween(0.18, 0.68);
       const radius = Phaser.Math.FloatBetween(0.8, 2.2);
-      stars.fillStyle(0xffffff, alpha);
+      stars.fillStyle(0xdce8ff, alpha);
       stars.fillCircle(
         Phaser.Math.Between(0, GAME_WIDTH),
         Phaser.Math.Between(0, GAME_HEIGHT),
@@ -440,6 +518,11 @@ class CoinroidsScene extends Phaser.Scene {
       if (!bullet?.active) return;
       this.wrapObject(bullet, 12);
       bullet.lifeMs -= delta;
+      bullet.rotation = bullet.fireRotation;
+      bullet.body.setVelocity(
+        bullet.body.velocity.x * 1.001,
+        bullet.body.velocity.y * 1.001
+      );
       if (bullet.lifeMs <= 0) {
         bullet.destroy();
       }
@@ -449,6 +532,8 @@ class CoinroidsScene extends Phaser.Scene {
       if (!coin?.active) return;
       this.wrapObject(coin, 38);
       coin.rotation += coin.spinSpeed * dt;
+      coin.damagePulse = Math.max(0, coin.damagePulse - dt * 4);
+      this.updateCoinShieldVisual(coin);
     });
 
     const remaining = Math.max(0, (this.endTime - time) / 1000);
@@ -461,23 +546,32 @@ class CoinroidsScene extends Phaser.Scene {
 
   fireBullet(time) {
     this.lastShotAt = time;
-    const bullet = this.bullets.get(this.ship.x, this.ship.y, 'bullet');
-    if (!bullet) return;
 
-    bullet.setActive(true);
-    bullet.setVisible(true);
-    bullet.setDepth(3);
-    bullet.body.reset(this.ship.x, this.ship.y);
-    bullet.setCircle(4);
+    const glow = this.bullets.get(this.ship.x, this.ship.y, 'bullet-glow');
+    const core = this.bullets.get(this.ship.x, this.ship.y, 'bullet-core');
+    if (!glow || !core) return;
 
-    const bulletSpeed = 460;
+    const bulletSpeed = 520;
     const inheritedVelocityX = this.ship.body.velocity.x * 0.45;
     const inheritedVelocityY = this.ship.body.velocity.y * 0.45;
 
-    this.physics.velocityFromRotation(this.ship.rotation, bulletSpeed, bullet.body.velocity);
-    bullet.body.velocity.x += inheritedVelocityX;
-    bullet.body.velocity.y += inheritedVelocityY;
-    bullet.lifeMs = 1200;
+    for (const bullet of [glow, core]) {
+      bullet.setActive(true);
+      bullet.setVisible(true);
+      bullet.setDepth(3);
+      bullet.body.reset(this.ship.x, this.ship.y);
+      bullet.setCircle(4, 10, 2);
+      bullet.fireRotation = this.ship.rotation;
+      bullet.rotation = this.ship.rotation;
+      this.physics.velocityFromRotation(this.ship.rotation, bulletSpeed, bullet.body.velocity);
+      bullet.body.velocity.x += inheritedVelocityX;
+      bullet.body.velocity.y += inheritedVelocityY;
+      bullet.lifeMs = 800;
+      bullet.isLaser = true;
+      bullet.setData('pairedBullet', bullet === glow ? core : glow);
+    }
+
+    this.emitMuzzleFlash();
     this.soundSynth.playShoot();
   }
 
@@ -504,44 +598,118 @@ class CoinroidsScene extends Phaser.Scene {
     const coin = this.coins.create(x, y, `coin-${symbol}`);
     coin.symbol = symbol;
     coin.config = config;
-    coin.hp = config.hp;
+    coin.shieldMax = config.shieldMax;
+    coin.shield = config.shieldMax;
+    coin.coreHp = 1;
     coin.spinSpeed = Phaser.Math.FloatBetween(-2.4, 2.4);
+    coin.damagePulse = 0;
     coin.setScale(config.scale);
     coin.setCircle(28);
     coin.setBounce(1, 1);
     coin.setDepth(2);
 
-    const ring = this.add.circle(x, y, 34, config.ring, 0.12).setDepth(1.5);
-    ring.setStrokeStyle(2, config.ring, 0.35);
-    coin.glowRing = ring;
+    coin.shieldAura = this.add.circle(x, y, 38, config.ring, 0.08).setDepth(1.3);
+    coin.shieldAura.setStrokeStyle(2, config.ring, 0.28);
+
+    coin.shieldRing = this.add.graphics().setDepth(1.7);
+    coin.coreRing = this.add.circle(x, y, 34, 0xffffff, 0).setDepth(1.6);
+    coin.coreRing.setStrokeStyle(2, 0xffffff, 0.1);
+
+    this.updateCoinShieldVisual(coin, true);
 
     const targetAngle = Phaser.Math.Angle.Between(x, y, this.ship.x, this.ship.y) + Phaser.Math.FloatBetween(-0.5, 0.5);
     this.physics.velocityFromRotation(targetAngle, config.speed + Phaser.Math.Between(-10, 20), coin.body.velocity);
   }
 
+  updateCoinShieldVisual(coin, force = false) {
+    if (!coin?.active && !force) return;
+
+    const x = coin.x;
+    const y = coin.y;
+    const outerRadius = 37;
+    const shieldPercent = coin.shieldMax > 0 ? Phaser.Math.Clamp(coin.shield / coin.shieldMax, 0, 1) : 0;
+    const pulseAlpha = 0.18 + coin.damagePulse * 0.28;
+
+    if (coin.shieldAura) {
+      coin.shieldAura.x = x;
+      coin.shieldAura.y = y;
+      coin.shieldAura.setFillStyle(coin.config.ring, shieldPercent > 0 ? 0.08 + pulseAlpha * 0.25 : 0.03);
+      coin.shieldAura.setStrokeStyle(2, coin.config.ring, shieldPercent > 0 ? 0.25 + pulseAlpha * 0.3 : 0.08);
+      coin.shieldAura.setScale(1 + coin.damagePulse * 0.05);
+    }
+
+    if (coin.coreRing) {
+      coin.coreRing.x = x;
+      coin.coreRing.y = y;
+      coin.coreRing.setStrokeStyle(2, shieldPercent > 0 ? 0xffffff : coin.config.shieldColor, shieldPercent > 0 ? 0.1 : 0.28);
+    }
+
+    if (!coin.shieldRing) return;
+
+    coin.shieldRing.clear();
+
+    if (shieldPercent > 0) {
+      coin.shieldRing.lineStyle(6, coin.config.shieldColor, 0.95);
+      coin.shieldRing.beginPath();
+      coin.shieldRing.arc(x, y, outerRadius, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * shieldPercent), false);
+      coin.shieldRing.strokePath();
+
+      coin.shieldRing.lineStyle(2, 0xffffff, 0.22 + pulseAlpha * 0.25);
+      coin.shieldRing.beginPath();
+      coin.shieldRing.arc(x, y, outerRadius + 5, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * shieldPercent), false);
+      coin.shieldRing.strokePath();
+    } else {
+      coin.shieldRing.lineStyle(2, coin.config.shieldColor, 0.12 + coin.damagePulse * 0.2);
+      coin.shieldRing.strokeCircle(x, y, outerRadius);
+    }
+  }
+
   handleBulletCoinCollision(bullet, coin) {
-    if (!bullet.active || !coin.active) return;
+    if (!bullet.active || !coin.active || this.gameEnded) return;
 
-    bullet.destroy();
-    coin.hp -= 1;
-    this.soundSynth.playCoinHit(coin.hp <= 0);
-    this.coinFlash(coin.x, coin.y, coin.config.ring, 6);
+    this.destroyBulletPair(bullet);
+    coin.damagePulse = 1;
 
-    if (coin.hp <= 0) {
+    if (coin.shield > 0) {
+      coin.shield -= 1;
+      this.soundSynth.playShieldHit();
+      this.coinFlash(coin.x, coin.y, coin.config.shieldColor, 8);
+      this.updateCoinShieldVisual(coin, true);
+      return;
+    }
+
+    coin.coreHp -= 1;
+    this.soundSynth.playCoinHit(coin.coreHp <= 0);
+    this.coinFlash(coin.x, coin.y, coin.config.ring, 10);
+
+    if (coin.coreHp <= 0) {
       wallet[coin.symbol] += coin.config.amount;
       this.coinsCollected += 1;
       renderWallet();
       flashWalletCard(coin.symbol);
-      this.coinFlash(coin.x, coin.y, coin.config.ring, 18);
-      coin.glowRing?.destroy();
+      this.coinFlash(coin.x, coin.y, coin.config.ring, 20);
+      coin.shieldAura?.destroy();
+      coin.shieldRing?.destroy();
+      coin.coreRing?.destroy();
       coin.destroy();
+    }
+  }
+
+  destroyBulletPair(bullet) {
+    if (!bullet || !bullet.active) return;
+    const pairedBullet = bullet.getData('pairedBullet');
+    bullet.destroy();
+    if (pairedBullet?.active) {
+      pairedBullet.destroy();
     }
   }
 
   handleShipCoinCollision(ship, coin) {
     if (this.gameEnded || !coin.active) return;
 
-    coin.glowRing?.destroy();
+    coin.shieldAura?.destroy();
+    coin.shieldRing?.destroy();
+    coin.coreRing?.destroy();
     coin.destroy();
     this.shipLives -= 1;
     this.livesText.setText(`Hull: ${this.shipLives}`);
@@ -552,6 +720,19 @@ class CoinroidsScene extends Phaser.Scene {
     if (this.shipLives <= 0) {
       this.endRun('Hull breach!');
     }
+  }
+
+  emitMuzzleFlash() {
+    const x = this.ship.x + Math.cos(this.ship.rotation) * 20;
+    const y = this.ship.y + Math.sin(this.ship.rotation) * 20;
+    const flash = this.add.circle(x, y, 10, 0x9ffcff, 0.85).setDepth(3.4);
+    this.tweens.add({
+      targets: flash,
+      alpha: 0,
+      scale: 1.8,
+      duration: 90,
+      onComplete: () => flash.destroy()
+    });
   }
 
   emitThruster() {
@@ -596,15 +777,19 @@ class CoinroidsScene extends Phaser.Scene {
     if (gameObject.y < -padding) gameObject.y = GAME_HEIGHT + padding;
     else if (gameObject.y > GAME_HEIGHT + padding) gameObject.y = -padding;
 
-    if (gameObject.glowRing) {
-      gameObject.glowRing.x = gameObject.x;
-      gameObject.glowRing.y = gameObject.y;
+    if (gameObject.shieldAura) {
+      gameObject.shieldAura.x = gameObject.x;
+      gameObject.shieldAura.y = gameObject.y;
+    }
+    if (gameObject.shieldRing || gameObject.coreRing) {
+      this.updateCoinShieldVisual(gameObject, true);
     }
   }
 
   endRun(reason) {
     if (this.gameEnded) return;
     this.gameEnded = true;
+    this.physics.world.pause();
     this.ship.setAcceleration(0, 0);
     this.ship.setAngularVelocity(0);
     this.ship.setVelocity(0, 0);
@@ -612,10 +797,20 @@ class CoinroidsScene extends Phaser.Scene {
 
     this.coins.children.iterate((coin) => {
       if (!coin?.active) return;
-      coin.glowRing?.destroy();
+      coin.shieldAura?.destroy();
+      coin.shieldRing?.destroy();
+      coin.coreRing?.destroy();
     });
 
-    const totalUsd = getWalletTotalUsd();
+    this.bullets.children.iterate((bullet) => {
+      if (!bullet?.active) return;
+      bullet.destroy();
+    });
+
+    const walletSnapshot = { ...wallet };
+    renderWallet(walletSnapshot);
+
+    const totalUsd = getWalletTotalUsd(walletSnapshot);
     const topRun = maybeUpdateTopRun(totalUsd);
     renderTopRun();
     const survivedSeconds = ((ROUND_DURATION_MS - Math.max(0, this.endTime - this.time.now)) / 1000).toFixed(1);
@@ -627,7 +822,7 @@ class CoinroidsScene extends Phaser.Scene {
         return `
           <div class="breakdown-row">
             <span>${symbol} · ${config.label}</span>
-            <strong>${formatCoinAmount(symbol, wallet[symbol])}</strong>
+            <strong>${formatCoinAmount(symbol, walletSnapshot[symbol])}</strong>
           </div>
         `;
       })

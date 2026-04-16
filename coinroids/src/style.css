@@ -280,3 +280,13 @@ button {
   }
 }
 
+
+
+.wallet-icon {
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.18), rgba(255,255,255,0.02) 65%);
+  padding: 2px;
+}
+
+.breakdown-row strong {
+  color: #f6fbff;
+}

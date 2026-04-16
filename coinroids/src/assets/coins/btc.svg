@@ -5,6 +5,6 @@
       <stop offset="100%" stop-color="#f7931a"/>
     </radialGradient>
   </defs>
-  <circle cx="48" cy="48" r="44" fill="url(#btcBg)" stroke="#fff5e8" stroke-width="4"/>
+  <circle cx="48" cy="48" r="44" fill="url(#btcBg)"/>
   <text x="48" y="59" text-anchor="middle" font-size="42" font-family="Arial, Helvetica, sans-serif" font-weight="700" fill="#ffffff">₿</text>
 </svg>

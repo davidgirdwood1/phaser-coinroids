@@ -6,7 +6,7 @@
       <stop offset="100%" stop-color="#70ffaf"/>
     </linearGradient>
   </defs>
-  <circle cx="48" cy="48" r="44" fill="#121520" stroke="#f4f7ff" stroke-width="4"/>
+  <circle cx="48" cy="48" r="44" fill="#121520"/>
   <g fill="url(#solStripe)">
     <path d="M28 24h37l-8 10H20z"/>
     <path d="M39 43h37l-8 10H31z"/>

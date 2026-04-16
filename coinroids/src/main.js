@@ -287,19 +287,51 @@ class SoundSynth {
 
   playShoot() {
     if (!this.ensureReady()) return;
+
     const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(1320, now);
-    osc.frequency.exponentialRampToValueAtTime(760, now + 0.05);
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(SHOOT_VOLUME, now + 0.004);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.065);
-    osc.connect(gain);
-    this.connectNode(gain);
-    osc.start(now);
-    osc.stop(now + 0.07);
+
+    // --- LOW BASS THUMP ---
+    const bass = this.ctx.createOscillator();
+    const bassGain = this.ctx.createGain();
+    bass.type = 'sine';
+    bass.frequency.setValueAtTime(140, now);
+    bass.frequency.exponentialRampToValueAtTime(60, now + 0.12);
+
+    bassGain.gain.setValueAtTime(0.0001, now);
+    bassGain.gain.exponentialRampToValueAtTime(0.5, now + 0.01);
+    bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+
+    bass.connect(bassGain);
+    this.connectNode(bassGain);
+
+    // --- LASER SNAP ---
+    const laser = this.ctx.createOscillator();
+    const laserGain = this.ctx.createGain();
+
+    laser.type = 'square';
+    laser.frequency.setValueAtTime(900, now);
+    laser.frequency.exponentialRampToValueAtTime(200, now + 0.08);
+
+    laserGain.gain.setValueAtTime(0.0001, now);
+    laserGain.gain.exponentialRampToValueAtTime(0.25, now + 0.005);
+    laserGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
+
+    laser.connect(laserGain);
+    this.connectNode(laserGain);
+
+    // --- slight filter for punch ---
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1200, now);
+
+    laserGain.connect(filter);
+    filter.connect(this.masterGain);
+
+    bass.start(now);
+    bass.stop(now + 0.15);
+
+    laser.start(now);
+    laser.stop(now + 0.12);
   }
 
   playCoinHit(isFinal = false) {

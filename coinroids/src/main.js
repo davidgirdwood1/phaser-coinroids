@@ -15,6 +15,14 @@ const MAX_SPEED = 360;
 const DRAG = 0.992;
 const BRAKE_DRAG = 0.965;
 
+// ===== AUDIO VOLUME CONFIG =====
+const MASTER_VOLUME = 0.8;     // overall volume (0.0 – 1.0)
+
+const SHOOT_VOLUME = 0.35;
+const COIN_VOLUME = 0.45;
+const COIN_FINAL_VOLUME = 0.6;
+const HIT_VOLUME = 0.7;
+
 const usdFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
@@ -190,7 +198,7 @@ class SoundSynth {
     if (!BaseAudioContext) return false;
     this.ctx = this.ctx || new BaseAudioContext();
     this.masterGain = this.masterGain || this.ctx.createGain();
-    this.masterGain.gain.value = .5;
+    this.masterGain.gain.value = MASTER_VOLUME;
     this.masterGain.connect(this.ctx.destination);
     if (this.ctx.state === 'suspended') {
       this.ctx.resume();
@@ -212,7 +220,7 @@ class SoundSynth {
     osc.frequency.setValueAtTime(880, now);
     osc.frequency.exponentialRampToValueAtTime(320, now + 0.07);
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.38, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(SHOOT_VOLUME, now + 0.005);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
     osc.connect(gain);
     this.connectNode(gain);
@@ -231,7 +239,8 @@ class SoundSynth {
     osc.frequency.setValueAtTime(startFreq, now);
     osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.09);
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(isFinal ? 0.24 : 0.18, now + 0.01);
+    const peakVolume = isFinal ? COIN_FINAL_VOLUME : COIN_VOLUME;
+    gain.gain.exponentialRampToValueAtTime(peakVolume, now + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
     osc.connect(gain);
     this.connectNode(gain);
@@ -252,7 +261,7 @@ class SoundSynth {
     filter.frequency.setValueAtTime(1100, now);
     filter.frequency.exponentialRampToValueAtTime(220, now + 0.18);
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.35, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(HIT_VOLUME, now + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
     osc.connect(filter);
     filter.connect(gain);

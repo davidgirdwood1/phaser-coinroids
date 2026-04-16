@@ -63,41 +63,6 @@ const modalBreakdownEl = document.getElementById('modal-breakdown');
 const restartButtonEl = document.getElementById('restart-button');
 const playAgainButtonEl = document.getElementById('play-again-button');
 
-const injectedStyle = document.createElement('style');
-injectedStyle.textContent = `
-.wallet-item {
-  align-items: center;
-  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
-}
-.wallet-item__left,
-.wallet-item__right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.wallet-item__right {
-  margin-left: auto;
-  text-align: right;
-}
-.wallet-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: block;
-  object-fit: cover;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 6px 16px rgba(0,0,0,0.3);
-}
-.wallet-flash {
-  animation: walletFlash 420ms ease-out;
-}
-@keyframes walletFlash {
-  0% { transform: scale(1); background: rgba(255,255,255,0.06); box-shadow: 0 0 0 rgba(116, 240, 207, 0); }
-  35% { transform: scale(1.03); background: rgba(116,240,207,0.16); box-shadow: 0 0 28px rgba(116,240,207,0.22); }
-  100% { transform: scale(1); background: rgba(255,255,255,0.04); box-shadow: 0 0 0 rgba(116, 240, 207, 0); }
-}
-`;
-document.head.appendChild(injectedStyle);
-
 function formatCoinAmount(symbol, amount) {
   return (amountFormatters[symbol] ?? amountFormatters.DOGE).format(amount);
 }

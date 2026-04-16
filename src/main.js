@@ -527,13 +527,13 @@ class CoinroidsScene extends Phaser.Scene {
       color: '#e8eeff'
     }).setDepth(4);
 
-    this.livesText = this.add.text(24, 52, 'Hull: 3', {
+    this.livesText = this.add.text(24, 52, 'Lives: 3', {
       fontFamily: 'Arial',
       fontSize: '20px',
       color: '#a3b8ff'
     }).setDepth(4);
 
-    this.tipText = this.add.text(GAME_WIDTH - 24, 18, 'Collect value, avoid collisions', {
+    this.tipText = this.add.text(GAME_WIDTH - 24, 18, 'Collect coins, avoid collisions', {
       fontFamily: 'Arial',
       fontSize: '20px',
       color: '#d7e3ff'
@@ -830,13 +830,13 @@ class CoinroidsScene extends Phaser.Scene {
     coin.coreRing?.destroy();
     coin.destroy();
     this.shipLives -= 1;
-    this.livesText.setText(`Hull: ${this.shipLives}`);
+    this.livesText.setText(`Lives: ${this.shipLives}`);
     this.cameras.main.shake(150, 0.008);
     this.coinFlash(ship.x, ship.y, 0xff5577, 16);
     this.soundSynth.playPlayerHit();
 
     if (this.shipLives <= 0) {
-      this.endRun('Hull breach!');
+      this.endRun('Lives breach!');
     }
   }
 

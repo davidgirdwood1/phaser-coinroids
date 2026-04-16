@@ -516,7 +516,16 @@ class CoinroidsScene extends Phaser.Scene {
 
     this.bullets.children.iterate((bullet) => {
       if (!bullet?.active) return;
-      this.wrapObject(bullet, 12);
+
+      // kill if offscreen
+      if (
+        bullet.x < -50 || bullet.x > GAME_WIDTH + 50 ||
+        bullet.y < -50 || bullet.y > GAME_HEIGHT + 50
+      ) {
+        this.destroyBulletPair(bullet);
+        return;
+      }
+
       bullet.lifeMs -= delta;
       bullet.rotation = bullet.fireRotation;
       bullet.body.setVelocity(
@@ -669,6 +678,22 @@ class CoinroidsScene extends Phaser.Scene {
 
     this.destroyBulletPair(bullet);
     coin.damagePulse = 1;
+
+    this.tweens.add({
+      targets: coin,
+      x: coin.x + Phaser.Math.Between(-4, 4),
+      y: coin.y + Phaser.Math.Between(-4, 4),
+      duration: 40,
+      yoyo: true,
+      repeat: 2
+    });
+
+    this.tweens.add({
+      targets: coin,
+      scale: coin.scale * 1.08,
+      duration: 60,
+      yoyo: true
+    });
 
     if (coin.shield > 0) {
       coin.shield -= 1;

@@ -50,11 +50,7 @@ https://phaser-coinroids.vercel.app/
 
 ## Current Coin Lineup
 
-- Bitcoin
-- Ethereum
-- Solana
-- XRP
-- Dogecoin
+- Bitcoin, Ethereum, Solana, XRP, Dogecoin
 
 Each coin has its own size, speed, spawn weight, and shield strength. Higher-value coins are larger, tougher, and more rewarding.
 
@@ -115,7 +111,8 @@ It is also a good example of shipping a focused interactive project from prototy
 - Additional sound design variations
 - More enemy types, power-ups, or combo scoring
 - Mobile-friendly control options
+- Live coin prices instead of a snapshot
 
 ## License
 
-This project is currently shared as a personal portfolio/demo project.
+This project is currently shared as a personal portfolio/demo project. It utilizes **Phaser** with **npm install phaser**

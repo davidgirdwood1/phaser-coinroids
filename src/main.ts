@@ -20,7 +20,7 @@ const COIN_FINAL_VOLUME = 0.6;
 const HIT_VOLUME = 0.7;
 const SHIELD_COLOR = 0x7c8cff;
 
-const PRICE_SNAPSHOT_LABEL = 'Price snapshot · Apr 16, 2026';
+const PRICE_SNAPSHOT_LABEL = 'Prices 4/16/26';
 const TOP_RUN_STORAGE_KEY = 'coinroidsTopRun_priceSnapshot_v1';
 
 const COIN_SCALES = {
@@ -767,6 +767,7 @@ class CoinroidsScene extends Phaser.Scene {
       })
       .setDepth(4);
 
+    /* (optional text on top right)
     this.tipText = this.add
       .text(GAME_WIDTH - 24, 18, 'Collect coins, avoid collisions', {
         fontFamily: 'Arial',
@@ -775,7 +776,9 @@ class CoinroidsScene extends Phaser.Scene {
       })
       .setOrigin(1, 0)
       .setDepth(4);
+    */
   }
+      
 
   private fireBullet(time: number): void {
     this.lastShotAt = time;

@@ -1,18 +1,16 @@
 # Coinroids
 
-![Coinroids Gameplay](./src/assets/demo.gif)
+A Phaser + TypeScript browser game focused on fast-paced arcade gameplay and polished UI feedback. 
+
+👉 Play it here: https://phaser-coinroids.vercel.app/
+
+[![Coinroids Gameplay](./src/assets/demo.gif)](https://your-vercel-link.vercel.app)
 
 **⚠️ Desktop Only:** Coinroids is currently designed for keyboard input and is **not supported on mobile devices**. Please use a desktop or laptop browser for the best experience.
 
 Coinroids is a portfolio experiment built with Phaser that reimagines the classic asteroid-style arcade loop with a crypto theme. You pilot a ship through a starfield, blast incoming coins with laser shots, and try to survive long enough to build the most valuable wallet possible before your hull is destroyed or time runs out.
 
 The project started as a gameplay prototype and evolved into a polished front-end game focused on game feel, visual feedback, and lightweight systems such as shielded enemies, wallet scoring, and retro-inspired audio synthesis.
-
-## Live Demo
-
-https://phaser-coinroids.vercel.app/
-
----
 
 ## Highlights
 
@@ -24,7 +22,6 @@ https://phaser-coinroids.vercel.app/
 - Polished heads-up display (HUD) and run summary experience
 - Lightweight asset pipeline using SVG graphics and procedural Phaser rendering
 
----
 
 ## Tech Stack
 
@@ -35,7 +32,6 @@ https://phaser-coinroids.vercel.app/
 - **CSS** for layout and UI styling
 - **Web Audio API (Application Programming Interface)** for synthesized sound effects
 
----
 
 ## Gameplay
 
@@ -46,7 +42,6 @@ https://phaser-coinroids.vercel.app/
 - Survive for **60 seconds** or until your hull reaches zero
 - Break coin shields, destroy coins, and grow your wallet value
 
----
 
 ## Current Coin Lineup
 
@@ -104,12 +99,18 @@ I made Coinroids as a portfolio experiment to explore:
 
 It is also a good example of shipping a focused interactive project from prototype to a demo-ready state.
 
+## Notable Work
+
+- Migrated the entire project from JavaScript to TypeScript
+- Introduced stronger typing across Phaser systems and game objects
+- Improved maintainability and developer experience
+
 ## Future Ideas
 
 - Fullscreen support refinements
 - Leaderboard or high-score persistence beyond local storage
 - Additional sound design variations
-- More enemy types, power-ups, or combo scoring
+- More coin types, power-ups, or combo scoring
 - Mobile-friendly control options
 - Live coin prices instead of a snapshot
 

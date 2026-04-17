@@ -1,27 +1,39 @@
 # Coinroids
 
+**⚠️ Desktop Only:** Coinroids is currently designed for keyboard input and is **not supported on mobile devices**. Please use a desktop or laptop browser for the best experience.
+
 Coinroids is a portfolio experiment built with Phaser that reimagines the classic asteroid-style arcade loop with a crypto theme. You pilot a ship through a starfield, blast incoming coins with laser shots, and try to survive long enough to build the most valuable wallet possible before your hull is destroyed or time runs out.
 
-The project started as a fun gameplay prototype and evolved into a small front-end game focused on moment-to-moment feel, visual feedback, and lightweight game systems such as shielded enemies, wallet scoring, and retro-inspired audio synthesis.
+The project started as a gameplay prototype and evolved into a polished front-end game focused on game feel, visual feedback, and lightweight systems such as shielded enemies, wallet scoring, and retro-inspired audio synthesis.
+
+## Live Demo
+
+https://phaser-coinroids.vercel.app/
+
+---
 
 ## Highlights
 
-- Built as a portfolio experiment to explore game development with Phaser
-- Fast arcade movement with thrust, turning, braking, and wraparound space navigation
-- Laser weapon system with custom synthesized sound effects
+- Built as a portfolio project to explore browser-based game development
+- Fast arcade movement with thrust, turning, braking, and wraparound navigation
+- Laser weapon system with synthesized sound effects using the Web Audio API (Application Programming Interface)
 - Shielded crypto coins with hit reactions and difficulty scaling
 - Wallet-based scoring system using a frozen crypto price snapshot for dramatic run totals
-- Responsive browser layout with a polished heads-up display and run summary modal
-- Lightweight asset setup using SVG coin art and procedural Phaser graphics
+- Polished heads-up display (HUD) and run summary experience
+- Lightweight asset pipeline using SVG graphics and procedural Phaser rendering
+
+---
 
 ## Tech Stack
 
 - **Phaser** for gameplay, rendering, animation, and Arcade Physics
-- **JavaScript** for game logic and UI wiring
-- **Vite** for local development and production builds
-- **HTML** for the app shell and overlay structure
-- **CSS** for layout, styling, and heads-up display visuals
-- **Web Audio API** for synthesized sound effects
+- **TypeScript** for strongly typed game logic and improved maintainability
+- **Vite** for development server and production builds
+- **HTML** for the application shell
+- **CSS** for layout and UI styling
+- **Web Audio API (Application Programming Interface)** for synthesized sound effects
+
+---
 
 ## Gameplay
 
@@ -32,6 +44,8 @@ The project started as a fun gameplay prototype and evolved into a small front-e
 - Survive for **60 seconds** or until your hull reaches zero
 - Break coin shields, destroy coins, and grow your wallet value
 
+---
+
 ## Current Coin Lineup
 
 - Bitcoin
@@ -40,26 +54,9 @@ The project started as a fun gameplay prototype and evolved into a small front-e
 - XRP
 - Dogecoin
 
-Each coin has its own size, speed, spawn weight, and shield strength. Higher-value coins are larger, tougher, and more rewarding to collect.
+Each coin has its own size, speed, spawn weight, and shield strength. Higher-value coins are larger, tougher, and more rewarding.
 
-## Project Structure
-
-```text
-.
-├── index.html
-├── package.json
-├── src
-│   ├── main.js
-│   ├── style.css
-│   └── assets
-│       └── coins
-│           ├── btc.svg
-│           ├── doge.svg
-│           ├── eth.svg
-│           ├── sol.svg
-│           └── xrp.svg
-└── ...
-```
+---
 
 ## Getting Started
 
@@ -97,17 +94,6 @@ npm run build
 ```bash
 npm run preview
 ```
-
-## Deployment
-
-This project is a simple front-end Vite app, so it can be deployed easily to services like **Vercel**.
-
-Typical deployment flow:
-
-1. Push the repo to GitHub
-2. Import the project into Vercel
-3. Let Vercel detect the app as a Vite project
-4. Deploy using the default build settings
 
 ## Why I Built This
 

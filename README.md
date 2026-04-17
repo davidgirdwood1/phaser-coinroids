@@ -1,5 +1,7 @@
 # Coinroids
 
+![Coinroids Gameplay](./src/assets/demo.gif)
+
 **⚠️ Desktop Only:** Coinroids is currently designed for keyboard input and is **not supported on mobile devices**. Please use a desktop or laptop browser for the best experience.
 
 Coinroids is a portfolio experiment built with Phaser that reimagines the classic asteroid-style arcade loop with a crypto theme. You pilot a ship through a starfield, blast incoming coins with laser shots, and try to survive long enough to build the most valuable wallet possible before your hull is destroyed or time runs out.
